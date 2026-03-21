@@ -17,7 +17,7 @@ from torch.optim.lr_scheduler import OneCycleLR, CosineAnnealingLR
 import numpy as np
 
 from diffusers import DDIMScheduler, StableDiffusionPipeline
-from diffusers.models.unet_2d_condition import UNet2DConditionModel
+from diffusers.models.unets.unet_2d_condition import UNet2DConditionModel
 
 
 from tqdm import tqdm
