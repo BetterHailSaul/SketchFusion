@@ -30,8 +30,14 @@ import utils.utils_losses as utils_losses
 
 from utils.utils_dataset import load_and_prepare_data, load_eval_data
 from utils.utils_correspondence import kpts_to_patch_idx, load_img_and_kps, convert_to_binary_mask, calculate_keypoint_transformation, get_distance, get_distance_mutual_nn
-sys.path.append("./sketchfusion/src/CLIP")
+sys.path.append("./src/CLIP")
 import clip
+
+# unfound stable-diffusion-2-1-base from huggingface, change source to modelscope
+# from modelscope import snapshot_download
+
+# model_dir = snapshot_download('stabilityai/stable-diffusion-2-1-base', cache_dir='')
+# print(f"Model downloaded to: {model_dir}")
 
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -386,12 +392,12 @@ class SDFeaturizer:
         onestep_pipe = onestep_pipe.to("cuda")
         onestep_pipe.enable_attention_slicing()
         null_prompt = ""
-        null_prompt_embeds = onestep_pipe._encode_prompt(
+        null_prompt_embeds = onestep_pipe.encode_prompt(
             prompt=null_prompt,
             device="cuda",
             num_images_per_prompt=1,
             do_classifier_free_guidance=False,
-        )  
+        )[0]  
 
         self.null_prompt_embeds = null_prompt_embeds
         self.null_prompt = null_prompt
@@ -408,12 +414,12 @@ class SDFeaturizer:
     ):
         img_tensor = img_tensor.repeat(ensemble_size, 1, 1, 1).cuda() 
 
-        prompt_embeds = self.pipe._encode_prompt(
+        prompt_embeds = self.pipe.encode_prompt(
             prompt=prompt,
             device="cuda",
             num_images_per_prompt=1,
             do_classifier_free_guidance=False,
-        )  
+        )[0]  
         prompt_embeds = prompt_embeds.repeat(ensemble_size, 1, 1)
         unet_ft_all_2 = self.pipe(
             img_tensor=img_tensor,
